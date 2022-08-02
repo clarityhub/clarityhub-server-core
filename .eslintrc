@@ -1,0 +1,23 @@
+{
+    "parser": "babel-eslint",
+    "extends": [
+        "clarity-hub/node",
+        "plugin:import/errors",
+        "plugin:import/warnings"
+    ],
+    "settings": {
+        "import/resolver": {
+            "webpack": {
+                "config": "configs/webpack.config.js"
+            }
+        }
+    },
+    "rules": {
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "no-tabs": "off",
+        "class-methods-use-this": "off"
+    }
+}

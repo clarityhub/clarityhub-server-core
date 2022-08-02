@@ -1,0 +1,262 @@
+service: persato-core
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+  # - serverless-offline-scheduler
+  - "@clarityhub/serverless-dynamodb-migrations"
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  migrationsTable: Migrations-${self:custom.stage}
+  bugsnagApiKey: 
+  slackAppId: 
+  slackClientId: 
+  slackClientSecret: 
+  slackSigningSecret: 
+  twilio:
+      local:
+        sid: 
+        key: 
+        secret: 
+        token: 
+      development:
+        sid: 
+        key: 
+        secret: 
+        token: 
+      production:
+        sid: 
+        key: 
+        secret: 
+        token: 
+  webapp: 
+    local:
+      uri: https://dashboard.clarityhub.app
+    development:
+      uri: https://dashboard.dev.clarityhub.io
+    production:
+      uri: https://dashboard.clarityhub.io
+  server: 
+    local:
+      uri: https://persato.clarityhub.app
+    development:
+      uri: https://persato.dev.clarityhub.io
+    production:
+      uri: https://persato.clarityhub.io
+  stripeApiKey: 
+    local:
+      apiKey: 
+      signingSecret: 
+    development:
+      apiKey: 
+      signingSecret: 
+    production:
+      apiKey: 
+      signingSecret: 
+  mediaBucketName: ${self:custom.stage}-media.clarityhub.io
+  kensisFirehoseStreamName: ${self:custom.stage}-persato
+  jwksUri: https://clarityhub.auth0.com/.well-known/jwks.json
+  jwtPublicKey: ${env:JWT_PUBLIC_KEY}
+  jwtSecretKey: ${env:JWT_SECRET_KEY}
+  mailchimpKey:
+  mailchimpAudienceId:
+  schedule:
+    local: true
+    development: false
+    production: false
+  s3Creds:
+    local:
+      endpoint: https://s3.us-west-2.amazonaws.com
+      region: us-west-2
+      accessKeyId:
+      secretAccessKey:
+    development:
+      endpoint: https://s3.${self:provider.region}.amazonaws.com
+      region: ""
+      accessKeyId: ""
+      secretAccessKey: ""
+    production:
+      endpoint: https://s3.${self:provider.region}.amazonaws.com
+      region: ""
+      accessKeyId: ""
+      secretAccessKey: ""
+  webpack:
+    webpackConfig: ./configs/webpack.config.js
+    includeModules: true
+  dynamodb:
+    stages:
+      - local
+    start:
+      port: 8000
+      migrate: true
+  serverless-offline:
+    port: 4000
+  cors:
+    origin: '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+      - X-ClarityHub-Organization
+    allowCredentials: false
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'local'}
+  region: ${env:AWS_REGION, 'us-west-2'}
+  memorySize: 512
+  timeout: 7
+  environment:
+    mediaBucketName: ${self:custom.mediaBucketName}
+    kensisFirehoseStreamName: ${self:custom.kensisFirehoseStreamName}
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    BUGSNAG_API_KEY: ${self:custom.bugsnagApiKey}
+    STRIPE_API_KEY: ${self:custom.stripeApiKey.${self:custom.stage}.apiKey}
+    STRIPE_SIGNING_SECRET: ${self:custom.stripeApiKey.${self:custom.stage}.signingSecret}
+    WEBAPP_URI: ${self:custom.webapp.${self:custom.stage}.uri}
+    SERVER_URI: ${self:custom.server.${self:custom.stage}.uri}
+    MAILCHIMP_API_KEY: ${self:custom.mailchimpKey}
+    MAILCHIMP_AUDIENCE_ID: ${self:custom.mailchimpAudienceId}
+    JWKS_URI: ${self:custom.jwksUri}
+    JWT_PUBLIC_KEY: ${self:custom.jwtPublicKey}
+    JWT_SECRET_KEY: ${self:custom.jwtSecretKey}
+    S3_ENDPOINT: ${self:custom.s3Creds.${self:custom.stage}.endpoint}
+    LOCAL_S3_REGION: ${self:custom.s3Creds.${self:custom.stage}.region}
+    LOCAL_S3_ACCESS_KEY_ID: ${self:custom.s3Creds.${self:custom.stage}.accessKeyId}
+    LOCAL_S3_SECRET_ACESS_KEY: ${self:custom.s3Creds.${self:custom.stage}.secretAccessKey}
+    LOCAL_TRANSCRIBE_ACCESS_KEY_ID: ${self:custom.s3Creds.${self:custom.stage}.accessKeyId}
+    LOCAL_TRANSCRIBE_SECRET_ACESS_KEY: ${self:custom.s3Creds.${self:custom.stage}.secretAccessKey}
+    SLACK_APP_ID: ${self:custom.slackAppId}
+    SLACK_CLIENT_ID: ${self:custom.slackClientId}
+    SLACK_CLIENT_SECRET: ${self:custom.slackClientSecret}
+    SLACK_SIGNING_SECRET: ${self:custom.slackSigningSecret}
+    TWILIO_SID: ${self:custom.twilio.${self:custom.stage}.sid}
+    TWILIO_KEY: ${self:custom.twilio.${self:custom.stage}.key}
+    TWILIO_SECRET: ${self:custom.twilio.${self:custom.stage}.secret}
+    TWILIO_TOKEN: ${self:custom.twilio.${self:custom.stage}.token}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:CreateTable
+        - dynamodb:UpdateTable
+        - dynamodb:ListTables
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-west-2:*:*"
+    - Effect: Allow
+      Action:
+        - transcribe:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminGetUser
+      Resource: "arn:aws:cognito-idp:us-west-2:*:*"
+    - Effect: Allow
+      Action:
+        - s3:DeleteObject
+        - s3:GetObject
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:custom.mediaBucketName}/*"
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - firehose:*
+      Resource: "*"
+
+# package:
+#   include:
+#     - docs/**
+#     - schemas/**
+
+functions:
+  # ===== Health Endpoint =====
+  health:
+    handler: src/health.default
+    events:
+      - http:
+          path: health
+          method: GET
+
+  # ===== Public Swagger Endpoint =====
+  # swagger:
+  #   handler: src/routes/swagger.default
+  #   events:
+  #     - http:
+  #         path: swagger
+  #         method: GET
+  #         cors: true
+
+  # ===== API Endpoints =====
+  root:
+    handler: src/router.default
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+  transcriptionJob:
+    handler: src/transcription.default
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - 'aws.transcribe'
+            detail-type:
+              - 'Transcribe Job State Change'
+            detail:
+              TranscriptionJobStatus:
+                - 'COMPLETED'
+                - 'FAILED'
+  localScheduler:
+    handler: src/local-transcript-checker.default
+    events:
+      - http:
+          path: /local/scheduler
+          method: any
+          cors: true
+          enabled: ${self:custom.schedule.${self:custom.stage}}
+
+  # ===== Migration Endpoints =====
+  up:
+    handler: src/migrations.up
+    timeout: 30
+    environment:
+      MIGRATION_TABLE: ${self:custom.migrationsTable}
+  down:
+    handler: src/migrations.down
+    timeout: 30
+    environment:
+      MIGRATION_TABLE: ${self:custom.migrationsTable}
+
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB
+  # - ${file(resources/dynamodb-table.yml)}
+  # Cognito
+  - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/cognito-identity-pool.yml)}
+  # S3
+  - ${file(resources/s3-bucket.yml)}
+  # Kinesis Firehose
+  - ${file(resources/firehose.yml)}

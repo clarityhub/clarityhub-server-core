@@ -1,0 +1,14 @@
+Resources:
+  FirehoseResource:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: ${self:custom.kensisFirehoseStreamName}
+      S3DestinationConfiguration:
+        BucketARN:
+          Fn::GetAtt: [DataResource, Arn]
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 5 
+        CompressionFormat: UNCOMPRESSED
+        Prefix: events/
+        RoleARN: arn:aws:iam::216016251951:role/firehose_delivery_role 
