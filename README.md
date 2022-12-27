@@ -37,6 +37,8 @@ Some technical requirements:
 
 ## 1.3 The product
 
+![Transcript example](./docs/transcript.png)
+
 Clarity Hub offered users Workspaces where they can create Notebooks full of rich-text notes including headings, images, file uploads, embedded audio and video recordings (via Interviews), and other embedding other notebooks.
 
 We offered transcribing for audio recordings, and those transcriptions could be edited to fix any transcribing issues, and could be pull-quoted into the notebook.
@@ -67,6 +69,8 @@ The Browser App was deploying to S3 and served via Cloudfront as a Single Page A
 Part of the infrastructure was managed using Terraform, but any services and roles needed by the Serverless deployments were managed by Serverless resources (which uses CloudFormation under the hood).
 
 ## 2.1. Audio and video transcribing
+
+![Audio example](./docs/audio.png)
 
 Audio and video transcribing was accomplished using the AWS Transcribe service.
 
@@ -106,11 +110,15 @@ Note: each request from the ClarityHub part of the sequence usually results in t
 
 The user from the UI will see the call end, any other users connected will see the embedded video call widget in the interviews and notebooks get updated to a completed state, and then will see that widget get updated with a linked transcription and links to download the recorded files.
 
+![Interview embedding](./docs/interview-embedding.png)
+
 Another note: Twilio at the time did not provide transcription quality that we found acceptable, so we would download, re-upload the media to S3, and then use the AWS Transcribe service instead.
 
 ## 2.2. Rich text editor
 
 We used [Slate](https://docs.slatejs.org/libraries/slate-react) as our rich text editor and React for the UI. Slate offers a way to embed React components as part of the text that users can edit, similar to [Notion.so](http://Notion.so). This made it easy to let users create Notebooks, which could embed Interviews. An Interview might be an audio or video recording with a transcript, and a Notebook can embed and Interview to let participants take notes, upload files, and embed images.
+
+![Pull Quote](./docs/pull-quote.gif)
 
 Slate also works based on changesets, which helps enable collaborative editing. We only experimented with this feature, but changesets are built into the UI React codebase. Only the latest snapshot of the editor is saved to the database.
 
@@ -121,6 +129,8 @@ Multi-tenancy is managed in Clarity Hub using workspaces. When a user logs into 
 Workspaces, notebooks, and most of the rest of the application are simple CRUD stores which read and write to DynamoDB.
 
 ## 2.4. Mobile
+
+![Mobile](./docs/mobile.png)
 
 The iOS and Android apps for Clarity Hub were written in Flutter using a Redux style architecture for loading, storing, and rendering content. The original version of this application was written via contract work, which is why the simplified External API was created.
 
