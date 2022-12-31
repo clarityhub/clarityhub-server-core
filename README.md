@@ -116,7 +116,7 @@ Another note: Twilio at the time did not provide transcription quality that we f
 
 ## 2.2. Rich text editor
 
-We used [Slate](https://docs.slatejs.org/libraries/slate-react) as our rich text editor and React for the UI. Slate offers a way to embed React components as part of the text that users can edit, similar to [Notion.so](http://Notion.so). This made it easy to let users create Notebooks, which could embed Interviews. An Interview might be an audio or video recording with a transcript, and a Notebook can embed and Interview to let participants take notes, upload files, and embed images.
+We used [Slate](https://docs.slatejs.org/libraries/slate-react) as our rich text editor and React for the UI. Slate offers a way to embed React components as part of the text that users can edit, similar to [Notion.so](http://Notion.so). This made it easy to let users create Notebooks, which could embed Interviews. An Interview might be an audio or video recording with a transcript. A Notebook can have notes, embed images and files, and even embed Interviews.
 
 ![Pull Quote](./docs/pull-quote.gif)
 
