@@ -39,7 +39,7 @@ Some technical requirements:
 
 ![Transcript example](./docs/transcript.png)
 
-![Video recording](./docs/recording-example.mov)
+[Video recording](./docs/recording-example.mov)
 
 Clarity Hub offered users Workspaces where they can create Notebooks full of rich-text notes including headings, images, file uploads, embedded audio and video recordings (via Interviews), and other embedding other notebooks.
 
