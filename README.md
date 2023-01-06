@@ -39,6 +39,8 @@ Some technical requirements:
 
 ![Transcript example](./docs/transcript.png)
 
+![Video recording](./docs/recording-example.mov)
+
 Clarity Hub offered users Workspaces where they can create Notebooks full of rich-text notes including headings, images, file uploads, embedded audio and video recordings (via Interviews), and other embedding other notebooks.
 
 We offered transcribing for audio recordings, and those transcriptions could be edited to fix any transcribing issues, and could be pull-quoted into the notebook.
@@ -136,6 +138,15 @@ The iOS and Android apps for Clarity Hub were written in Flutter using a Redux s
 
 The mobile application can record audio using `flutter_sound_lite` package, and allowed users to upload and view files, take notes, and manage interviews. 
 
+Both the mobile Flutter application and the React application used a similar Redux style unidirectional data flow:
+
+```mermaid
+graph TD
+  UI -->|Event| Event(Event Dispatcher)
+  Event -->|Action| Store
+  Store -->|New State| UI
+```
+
 ## 2.5. Experimental NLP
 
 The NLP part of Clarity Hub was still experimental. While we exposed the NLP endpoints via a public API that anyone could use to train and infer labels, we did not release automatic labelling in the product.
@@ -182,6 +193,18 @@ In Clarity Hub’s UI, we trained our internal dataset off of notebooks that had
 The rest of the application leveraged external services heavily to get functionality out the door.
 
 We used Auth0 for managing different authentication methods. We used JWKS to validate the JWT that Auth0 provided us, then exchanged that JWT for one signed by our services.
+
+```mermaid
+sequenceDiagram
+  Browser->>Auth0: Redirect
+  Auth0->>Browser: Redirect with JWT
+  Browser->>Clarity Hub API: Request Workspaces with JWT
+  Clarity Hub API->>Auth0: Request JWKs (response cached)
+  Auth0->>Clarity Hub API: Send JWKs
+  Clarity Hub API->>Browser: Send list of Workspaces
+  Browser->>Clarity Hub API: Send Workspace to log into with JWT
+  Clarity Hub API->>Browser: Send new JWT, signed by Clarity Hub with user and workspace data
+```
 
 For billing, we leveraged Stripe to create and manage plans and users in a workspace.
 
